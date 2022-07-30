@@ -25,7 +25,7 @@ void HexaPod_Init(HexaPod* hexapod){
     LegIndex legIndex=LeftFront;
     for(;legIndex<=RightHide;++legIndex){
         hexapod->legs[legIndex].state = Lock;
-        hexapod->legs[legIndex].legID = getLegID(legIndex);
+        hexapod->legs[legIndex].legID = getLegID(legIndex);//该机械足的腿跟舵机ID，ID+1,ID+2为该机械足中端，末端舵机ID号
     }
     lockAllLegs();
 }
@@ -39,7 +39,7 @@ void getAllLegsAngle(){
     getServoAngle(18,0,1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16,17,18);
     while(!isUartRxCompleted);
     isUartRxCompleted = 0;
-    convertAngle(18,ConVertAngleBuf,AngleBuf);
+    convertAngle(ConvertAngleBuf, AngleBuf);
 }
 
 void unlockLeg(HexaPod* hexapod, LegIndex index){
@@ -114,7 +114,7 @@ void setLegAngle(LegIndex index,double thetaA,double thetaB,double thetaC){
     theta[ID_0-1]=thetaA;
     theta[ID_0]=thetaB;
     theta[ID_0+1]=thetaC;
-    deConvertAngle(18,angle,theta);
+    deConvertAngle(angle,theta);
     moveServos(3,1000,
                ID_0,angle[ID_0-1],
                ID_0+1,angle[ID_0],
@@ -122,7 +122,7 @@ void setLegAngle(LegIndex index,double thetaA,double thetaB,double thetaC){
 }
 
 void setAllLegs(uint16_t *angle,double *theta){
-    deConvertAngle(18,angle,theta);
+    deConvertAngle(angle,theta);
     moveServos(18,1000,
                1,angle[0],
                2,angle[1],
@@ -146,7 +146,7 @@ void setAllLegs(uint16_t *angle,double *theta){
 
 void setAllMidLeg(uint16_t *angle,double theta){
     double thetaA[18] = {theta,theta,theta,theta,theta,theta,theta,theta,theta,theta,theta,theta,theta,theta,theta,theta,theta,theta};
-    deConvertAngle(18,angle,thetaA);
+    deConvertAngle(angle,thetaA);
     moveServos(6,1000,
                2,angle[1],
                5,angle[4],
@@ -158,7 +158,7 @@ void setAllMidLeg(uint16_t *angle,double theta){
 
 void setAllEndLeg(uint16_t *angle,double theta){
     double thetaA[18] = {theta,theta,theta,theta,theta,theta,theta,theta,theta,theta,theta,theta,theta,theta,theta,theta,theta,theta};
-    deConvertAngle(18,angle,thetaA);
+    deConvertAngle(angle,thetaA);
     moveServos(6,1000,
                3,angle[2],
                6,angle[5],

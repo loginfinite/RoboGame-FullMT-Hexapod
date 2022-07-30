@@ -230,7 +230,7 @@
 				77,
 				79,
 				81,
-				83
+				84
 			]
 		},
 		{
@@ -395,6 +395,11 @@
 				"backtrace" : 4,
 				"fragment" : "C:/Users/35802/Desktop/stm/uarttest/STM32F103ZETX_FLASH.ld",
 				"role" : "flags"
+			},
+			{
+				"backtrace" : 4,
+				"fragment" : "Servo/Inc/ServoDeviation.h",
+				"role" : "flags"
 			}
 		],
 		"language" : "C"
@@ -468,7 +473,8 @@
 				62,
 				78,
 				80,
-				82
+				82,
+				83
 			]
 		},
 		{
@@ -497,7 +503,7 @@
 				77,
 				79,
 				81,
-				83
+				84
 			]
 		},
 		{
@@ -508,7 +514,7 @@
 				13,
 				35,
 				63,
-				84
+				85
 			]
 		}
 	],
@@ -950,6 +956,11 @@
 		{
 			"backtrace" : 1,
 			"path" : "Servo/Inc/Servo.h",
+			"sourceGroupIndex" : 0
+		},
+		{
+			"backtrace" : 1,
+			"path" : "Servo/Inc/ServoDeviation.h",
 			"sourceGroupIndex" : 0
 		},
 		{

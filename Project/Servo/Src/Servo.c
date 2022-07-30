@@ -3,6 +3,7 @@
 //
 #include <stdarg.h>
 #include "Servo.h"
+#include "ServoDeviation.h"
 #define GET_LOW_BYTE(A) ((uint8_t)(A))
 //宏函数 获得A的低八位
 #define GET_HIGH_BYTE(A) ((uint8_t)((A) >> 8))
@@ -13,19 +14,10 @@ uint8_t LobotTxBuf[128];  //发送缓存
 uint8_t LobotRxBuf[16];
 uint16_t batteryVolt;
 
-
-
 void Uart_Init(UART_HandleTypeDef *huart){
     ServoHuart = huart;
 }
-/*********************************************************************************
- * Function:  moveServo
- * Description： 控制单个舵机转动
- * Parameters:   sevoID:舵机ID，Position:目标位置,Time:转动时间
-                    舵机ID取值:0<=舵机ID<=31,Time取值: Time > 0
- * Return:       无返回
- * Others:
- **********************************************************************************/
+
 void moveServo(uint8_t servoID, uint16_t Position, uint16_t Time)
 {
     if (servoID > 31 || !(Time > 0)) {  //舵机ID不能打于31,可根据对应控制板修改
@@ -43,44 +35,7 @@ void moveServo(uint8_t servoID, uint16_t Position, uint16_t Time)
     HAL_UART_Transmit(ServoHuart,LobotTxBuf,10, HAL_MAX_DELAY);
 }
 
-/*********************************************************************************
- * Function:  moveServosByArray
- * Description： 控制多个舵机转动
- * Parameters:   servos[]:舵机结体数组，Num:舵机个数,Time:转动时间
-                    0 < Num <= 32,Time > 0
- * Return:       无返回
- * Others:
- **********************************************************************************/
-void moveServosByArray(LobotServo servos[], uint8_t Num, uint16_t Time)
-{
-    uint8_t index = 7;
-    uint8_t i = 0;
 
-    if (Num < 1 || Num > 32 || !(Time > 0)) {
-        return;                                          //舵机数不能为零和大与32，时间不能为零
-    }
-    LobotTxBuf[0] = LobotTxBuf[1] = FRAME_HEADER;      //填充帧头
-    LobotTxBuf[2] = Num * 3 + 5;                       //数据长度 = 要控制舵机数*3+5
-    LobotTxBuf[3] = CMD_SERVO_MOVE;                    //填充舵机移动指令
-    LobotTxBuf[4] = Num;                               //要控制的舵机个数
-    LobotTxBuf[5] = GET_LOW_BYTE(Time);                //取得时间的低八位
-    LobotTxBuf[6] = GET_HIGH_BYTE(Time);               //取得时间的高八位
-
-    for (i = 0; i < Num; i++) {                        //循环填充舵机ID和对应目标位置
-        LobotTxBuf[index++] = servos[i].ID;              //填充舵机ID
-        LobotTxBuf[index++] = GET_LOW_BYTE(servos[i].Position); //填充目标位置低八位
-        LobotTxBuf[index++] = GET_HIGH_BYTE(servos[i].Position);//填充目标位置高八位
-    }
-    HAL_UART_Transmit(ServoHuart,LobotTxBuf,LobotTxBuf[2] + 2, HAL_MAX_DELAY);
-}
-
-/*********************************************************************************
- * Function:  moveServos
- * Description： 控制多个舵机转动
- * Parameters:   Num:舵机个数,Time:转动时间,...:舵机ID,转动角，舵机ID,转动角度 如此类推
- * Return:       无返回
- * Others:
- **********************************************************************************/
 void moveServos(uint8_t Num, uint16_t Time, ...)
 {
     uint8_t index = 7;
@@ -106,7 +61,6 @@ void moveServos(uint8_t Num, uint16_t Time, ...)
         LobotTxBuf[index++] = GET_LOW_BYTE(((uint16_t)temp)); //填充目标位置低八位
         LobotTxBuf[index++] = GET_HIGH_BYTE(temp);//填充目标位置高八位
     }
-
     va_end(arg_ptr);  //置空arg_ptr
     //发送
     HAL_UART_Transmit(ServoHuart,LobotTxBuf,LobotTxBuf[2] + 2, HAL_MAX_DELAY);
@@ -134,12 +88,6 @@ void unloadServos(uint8_t Num,uint16_t Time,...){
     HAL_UART_Transmit(ServoHuart,LobotTxBuf, LobotTxBuf[2] + 2,HAL_MAX_DELAY);    //发送
 }
 
-/*********************************************************************************
- * Function:  getBatteryVoltage
- * Description： 发送获取电池电压命令
- * Return:       无返回
- * Others:
- **********************************************************************************/
 void getBatteryVoltage(void)
 {
 //	uint16_t Voltage = 0;
@@ -169,81 +117,202 @@ void getServoAngle(uint8_t Num,uint16_t Time,...){
     HAL_UART_Transmit_IT(ServoHuart,LobotTxBuf, LobotTxBuf[2] + 2);    //发送
 }
 
-void convertAngle(uint8_t Num,double * convertAngleBuf, uint16_t * angleBuf){
-    int i=0;
-    double base = 500;
-    for(;i<Num;i+=3){
-        if(i==12){
-         convertAngleBuf[i] = ((((double)(angleBuf[i]-440.0))/base)*90.0);
-        }
-        else
-         convertAngleBuf[i] = ((((double)(angleBuf[i]-500.0))/base)*90.0);
-    }
-    for(i=1;i<Num+1;i+=3){
-        if(i==7){
-            double base_for_id_8 = 383.0;
-            convertAngleBuf[i] = ((1-((((double )angleBuf[i])-240.0)/base_for_id_8))*90.0);
-        }else{
-            double base_for_mid = 370.0;
-            convertAngleBuf[i] = ((1-((((double )angleBuf[i])-200.0)/base_for_mid))*90.0);
-        }
-    }
-    for(i=2;i<Num+2;i+=3){
-        switch(i){
-            case 2:convertAngleBuf[i] = ((((((double )angleBuf[i])-120.0)/360))*90.0);break;
-            case 5:convertAngleBuf[i] = ((((((double )angleBuf[i])-192.0)/370))*90.0);break;
-            case 8:convertAngleBuf[i] = ((((((double )angleBuf[i])-540.0)/360))*90.0);break;
-            case 11:convertAngleBuf[i] = ((((((double )angleBuf[i])-70.0)/360))*90.0);break;
-            case 14:convertAngleBuf[i] = ((((((double )angleBuf[i])-181.0)/369))*90.0);break;
-            case 17:convertAngleBuf[i] = ((((((double )angleBuf[i])-680.0)/360))*90.0);break;
-            default:;
+
+
+void convertAngleData(double * convertAngleBuf,uint16_t * angleBuf){
+    int iter = 0;
+    for(iter = 1;iter < TOTAL_SERVOS_NUM + 1;++iter){
+        switch (iter) {
+            case 1:convertAngleBuf[iter] =
+                            (((double)(angleBuf[iter]-SERVO_1_MIN_ANGLE))
+                            /(SERVO_1_MAX_ANGLE-SERVO_1_MIN_ANGLE)) * 90.0;break;
+            case 2:convertAngleBuf[iter] =
+                           (((double)(angleBuf[iter]-SERVO_2_MIN_ANGLE))
+                            /(SERVO_2_MAX_ANGLE-SERVO_2_MIN_ANGLE)) * 90.0;break;
+            case 3:convertAngleBuf[iter] =
+                           (((double)(angleBuf[iter]-SERVO_3_MIN_ANGLE))
+                            /(SERVO_3_MAX_ANGLE-SERVO_3_MIN_ANGLE)) * 90.0;break;
+            case 4:convertAngleBuf[iter] =
+                           (((double)(angleBuf[iter]-SERVO_4_MIN_ANGLE))
+                            /(SERVO_4_MAX_ANGLE-SERVO_4_MIN_ANGLE)) * 90.0;break;
+            case 5:convertAngleBuf[iter] =
+                           (((double)(angleBuf[iter]-SERVO_5_MIN_ANGLE))
+                            /(SERVO_5_MAX_ANGLE-SERVO_5_MIN_ANGLE)) * 90.0;break;
+            case 6:convertAngleBuf[iter] =
+                           (((double)(angleBuf[iter]-SERVO_6_MIN_ANGLE))
+                            /(SERVO_6_MAX_ANGLE-SERVO_6_MIN_ANGLE)) * 90.0;break;
+            case 7:convertAngleBuf[iter] =
+                           (((double)(angleBuf[iter]-SERVO_7_MIN_ANGLE))
+                            /(SERVO_7_MAX_ANGLE-SERVO_7_MIN_ANGLE)) * 90.0;break;
+            case 8:convertAngleBuf[iter] =
+                           (((double)(angleBuf[iter]-SERVO_8_MIN_ANGLE))
+                            /(SERVO_8_MAX_ANGLE-SERVO_8_MIN_ANGLE)) * 90.0;break;
+            case 9:convertAngleBuf[iter] =
+                           (((double)(angleBuf[iter]-SERVO_9_MIN_ANGLE))
+                            /(SERVO_9_MAX_ANGLE-SERVO_9_MIN_ANGLE)) * 90.0;break;
+            case 10:convertAngleBuf[iter] =
+                           (((double)(angleBuf[iter]-SERVO_10_MIN_ANGLE))
+                            /(SERVO_10_MAX_ANGLE-SERVO_10_MIN_ANGLE)) * 90.0;break;
+            case 11:convertAngleBuf[iter] =
+                           (((double)(angleBuf[iter]-SERVO_11_MIN_ANGLE))
+                            /(SERVO_11_MAX_ANGLE-SERVO_11_MIN_ANGLE)) * 90.0;break;
+            case 12:convertAngleBuf[iter] =
+                           (((double)(angleBuf[iter]-SERVO_12_MIN_ANGLE))
+                            /(SERVO_12_MAX_ANGLE-SERVO_12_MIN_ANGLE)) * 90.0;break;
+            case 13:convertAngleBuf[iter] =
+                           (((double)(angleBuf[iter]-SERVO_13_MIN_ANGLE))
+                            /(SERVO_13_MAX_ANGLE-SERVO_13_MIN_ANGLE)) * 90.0;break;
+            case 14:convertAngleBuf[iter] =
+                           (((double)(angleBuf[iter]-SERVO_14_MIN_ANGLE))
+                            /(SERVO_14_MAX_ANGLE-SERVO_14_MIN_ANGLE)) * 90.0;break;
+            case 15:convertAngleBuf[iter] =
+                           (((double)(angleBuf[iter]-SERVO_15_MIN_ANGLE))
+                            /(SERVO_15_MAX_ANGLE-SERVO_15_MIN_ANGLE)) * 90.0;break;
+            case 16:convertAngleBuf[iter] =
+                           (((double)(angleBuf[iter]-SERVO_16_MIN_ANGLE))
+                            /(SERVO_16_MAX_ANGLE-SERVO_16_MIN_ANGLE)) * 90.0;break;
+            case 17:convertAngleBuf[iter] =
+                           (((double)(angleBuf[iter]-SERVO_17_MIN_ANGLE))
+                            /(SERVO_17_MAX_ANGLE-SERVO_17_MIN_ANGLE)) * 90.0;break;
+            case 18:convertAngleBuf[iter] =
+                           (((double)(angleBuf[iter]-SERVO_18_MIN_ANGLE))
+                            /(SERVO_18_MAX_ANGLE-SERVO_18_MIN_ANGLE)) * 90.0;break;
+            case 19:convertAngleBuf[iter] =
+                           (((double)(angleBuf[iter]-SERVO_19_MIN_ANGLE))
+                            /(SERVO_19_MAX_ANGLE-SERVO_19_MIN_ANGLE)) * 90.0;break;
+            case 20:convertAngleBuf[iter] =
+                           (((double)(angleBuf[iter]-SERVO_20_MIN_ANGLE))
+                            /(SERVO_20_MAX_ANGLE-SERVO_20_MIN_ANGLE)) * 90.0;break;
+            case 21:convertAngleBuf[iter] =
+                           (((double)(angleBuf[iter]-SERVO_21_MIN_ANGLE))
+                            /(SERVO_21_MAX_ANGLE-SERVO_21_MIN_ANGLE)) * 90.0;break;
+            case 22:convertAngleBuf[iter] =
+                           (((double)(angleBuf[iter]-SERVO_22_MIN_ANGLE))
+                            /(SERVO_22_MAX_ANGLE-SERVO_22_MIN_ANGLE)) * 90.0;break;
+            case 23:convertAngleBuf[iter] =
+                           (((double)(angleBuf[iter]-SERVO_23_MIN_ANGLE))
+                            /(SERVO_23_MAX_ANGLE-SERVO_23_MIN_ANGLE)) * 90.0;break;
+            case 24:convertAngleBuf[iter] =
+                           (((double)(angleBuf[iter]-SERVO_24_MIN_ANGLE))
+                            /(SERVO_24_MAX_ANGLE-SERVO_24_MIN_ANGLE)) * 90.0;break;
+            case 25:convertAngleBuf[iter] =
+                           (((double)(angleBuf[iter]-SERVO_25_MIN_ANGLE))
+                            /(SERVO_25_MAX_ANGLE-SERVO_25_MIN_ANGLE)) * 90.0;break;
+            case 26:convertAngleBuf[iter] =
+                           (((double)(angleBuf[iter]-SERVO_26_MIN_ANGLE))
+                            /(SERVO_26_MAX_ANGLE-SERVO_26_MIN_ANGLE)) * 90.0;break;
+            case 27:convertAngleBuf[iter] =
+                           (((double)(angleBuf[iter]-SERVO_27_MIN_ANGLE))
+                            /(SERVO_27_MAX_ANGLE-SERVO_27_MIN_ANGLE)) * 90.0;break;
+            case 28:convertAngleBuf[iter] =
+                           (((double)(angleBuf[iter]-SERVO_28_MIN_ANGLE))
+                            /(SERVO_28_MAX_ANGLE-SERVO_28_MIN_ANGLE)) * 90.0;break;
+            case 29:convertAngleBuf[iter] =
+                           (((double)(angleBuf[iter]-SERVO_29_MIN_ANGLE))
+                            /(SERVO_29_MAX_ANGLE-SERVO_29_MIN_ANGLE)) * 90.0;break;
+            case 30:convertAngleBuf[iter] =
+                           (((double)(angleBuf[iter]-SERVO_30_MIN_ANGLE))
+                            /(SERVO_30_MAX_ANGLE-SERVO_30_MIN_ANGLE)) * 90.0;break;
+            default:;break;
         }
     }
 }
 
-void deConvertAngle(uint8_t Num,uint16_t * angleBuf, double * convertAngleBuf){
-    int i=0;
-    double base = 500;
-    double nineT = 90;
-    for(;i<Num;i+=3){
-        if(i==12){
-            angleBuf[i] = (uint16_t)((convertAngleBuf[i]/nineT)*base+440.0);
-        }
-        else
-            angleBuf[i] = (uint16_t)((convertAngleBuf[i]/nineT)*base+500.0);
-    }
-    for(i=1;i<Num+1;i+=3){
-        if(i==7){
-            double base_for_id_8 = 383.0;
-            angleBuf[i] = (uint16_t)(((1.0-(convertAngleBuf[i]/90.0))*base_for_id_8)+240.0);
-            //convertAngleBuf[i] = (int)((1-((((double )angleBuf[i])-240.0)/base_for_id_8))*90);
-        }else{
-            double base_for_mid = 370.0;
-            angleBuf[i] = (uint16_t)(((1.0-(convertAngleBuf[i]/nineT))*base_for_mid)+200.0);
-            //convertAngleBuf[i] = (int)((1-((((double )angleBuf[i])-200.0)/base_for_mid))*90);
-        }
-    }
-    for(i=2;i<Num+2;i+=3){
-        switch(i){
-            case 2://convertAngleBuf[i] = (int)((((((double )angleBuf[i])-120.0)/360))*90);
-            angleBuf[i] = (uint16_t)((convertAngleBuf[i]/90.0)*360.0+120.0);
-            break;
-            case 5://convertAngleBuf[i] = (int)((((((double )angleBuf[i])-140.0)/360))*90);
-            angleBuf[i] = (uint16_t)((convertAngleBuf[i]/90.0)*370.0+192.0);
-            break;
-            case 8://convertAngleBuf[i] = (int)((((((double )angleBuf[i])-540.0)/360))*90);
-            angleBuf[i] = (uint16_t)((convertAngleBuf[i]/90.0)*360.0+540.0);
-            break;
-            case 11://convertAngleBuf[i] = (int)((((((double )angleBuf[i])-70.0)/360))*90);
-                angleBuf[i] = (uint16_t)((convertAngleBuf[i]/90.0)*360.0+70.0);
-            break;
-            case 14://convertAngleBuf[i] = (int)((((((double )angleBuf[i])-181.0)/369))*90);
-                angleBuf[i] = (uint16_t)((convertAngleBuf[i]/90.0)*369.0+181.0);
-            break;
-            case 17://convertAngleBuf[i] = (int)((((((double )angleBuf[i])-500.0)/360))*90);
-                angleBuf[i] = (uint16_t)((convertAngleBuf[i]/90.0)*360.0+680.0);
-            break;
-            default:;
+void deConvertAngle(double * convertAngleBuf, uint16_t * angleBuf){
+    int iter = 0;
+    for(iter = 1;iter < TOTAL_SERVOS_NUM + 1;++iter){
+        switch (iter) {
+            case 1:angleBuf[iter] =
+                           (uint16_t)((convertAngleBuf[iter]/90) * (SERVO_1_MAX_ANGLE-SERVO_1_MIN_ANGLE)
+                                      + SERVO_1_MIN_ANGLE);break;
+            case 2:angleBuf[iter] =
+                           (uint16_t)((convertAngleBuf[iter]/90) * (SERVO_2_MAX_ANGLE-SERVO_2_MIN_ANGLE)
+                                      + SERVO_2_MIN_ANGLE);break;
+            case 3:angleBuf[iter] =
+                           (uint16_t)((convertAngleBuf[iter]/90) * (SERVO_3_MAX_ANGLE-SERVO_3_MIN_ANGLE)
+                                      + SERVO_3_MIN_ANGLE);break;
+            case 4:angleBuf[iter] =
+                           (uint16_t)((convertAngleBuf[iter]/90) * (SERVO_4_MAX_ANGLE-SERVO_4_MIN_ANGLE)
+                                      + SERVO_4_MIN_ANGLE);break;
+            case 5:angleBuf[iter] =
+                           (uint16_t)((convertAngleBuf[iter]/90) * (SERVO_5_MAX_ANGLE-SERVO_5_MIN_ANGLE)
+                                      + SERVO_5_MIN_ANGLE);break;
+            case 6:angleBuf[iter] =
+                           (uint16_t)((convertAngleBuf[iter]/90) * (SERVO_6_MAX_ANGLE-SERVO_6_MIN_ANGLE)
+                                      + SERVO_6_MIN_ANGLE);break;
+            case 7:angleBuf[iter] =
+                           (uint16_t)((convertAngleBuf[iter]/90) * (SERVO_7_MAX_ANGLE-SERVO_7_MIN_ANGLE)
+                                      + SERVO_7_MIN_ANGLE);break;
+            case 8:angleBuf[iter] =
+                           (uint16_t)((convertAngleBuf[iter]/90) * (SERVO_8_MAX_ANGLE-SERVO_8_MIN_ANGLE)
+                                      + SERVO_8_MIN_ANGLE);break;
+            case 9:angleBuf[iter] =
+                           (uint16_t)((convertAngleBuf[iter]/90) * (SERVO_9_MAX_ANGLE-SERVO_9_MIN_ANGLE)
+                                      + SERVO_9_MIN_ANGLE);break;
+            case 10:angleBuf[iter] =
+                            (uint16_t)((convertAngleBuf[iter]/90) * (SERVO_10_MAX_ANGLE-SERVO_10_MIN_ANGLE)
+                                       + SERVO_10_MIN_ANGLE);break;
+            case 11:angleBuf[iter] =
+                            (uint16_t)((convertAngleBuf[iter]/90) * (SERVO_11_MAX_ANGLE-SERVO_11_MIN_ANGLE)
+                                       + SERVO_11_MIN_ANGLE);break;
+            case 12:angleBuf[iter] =
+                            (uint16_t)((convertAngleBuf[iter]/90) * (SERVO_12_MAX_ANGLE-SERVO_12_MIN_ANGLE)
+                                       + SERVO_12_MIN_ANGLE);break;
+            case 13:angleBuf[iter] =
+                            (uint16_t)((convertAngleBuf[iter]/90) * (SERVO_13_MAX_ANGLE-SERVO_13_MIN_ANGLE)
+                                       + SERVO_13_MIN_ANGLE);break;
+            case 14:angleBuf[iter] =
+                            (uint16_t)((convertAngleBuf[iter]/90) * (SERVO_14_MAX_ANGLE-SERVO_14_MIN_ANGLE)
+                                       + SERVO_14_MIN_ANGLE);break;
+            case 15:angleBuf[iter] =
+                            (uint16_t)((convertAngleBuf[iter]/90) * (SERVO_15_MAX_ANGLE-SERVO_15_MIN_ANGLE)
+                                       + SERVO_15_MIN_ANGLE);break;
+            case 16:angleBuf[iter] =
+                            (uint16_t)((convertAngleBuf[iter]/90) * (SERVO_16_MAX_ANGLE-SERVO_16_MIN_ANGLE)
+                                       + SERVO_16_MIN_ANGLE);break;
+            case 17:angleBuf[iter] =
+                            (uint16_t)((convertAngleBuf[iter]/90) * (SERVO_17_MAX_ANGLE-SERVO_17_MIN_ANGLE)
+                                       + SERVO_17_MIN_ANGLE);break;
+            case 18:angleBuf[iter] =
+                            (uint16_t)((convertAngleBuf[iter]/90) * (SERVO_18_MAX_ANGLE-SERVO_18_MIN_ANGLE)
+                                       + SERVO_18_MIN_ANGLE);break;
+            case 19:angleBuf[iter] =
+                            (uint16_t)((convertAngleBuf[iter]/90) * (SERVO_19_MAX_ANGLE-SERVO_19_MIN_ANGLE)
+                                       + SERVO_19_MIN_ANGLE);break;
+            case 20:angleBuf[iter] =
+                            (uint16_t)((convertAngleBuf[iter]/90) * (SERVO_20_MAX_ANGLE-SERVO_20_MIN_ANGLE)
+                                       + SERVO_20_MIN_ANGLE);break;
+            case 21:angleBuf[iter] =
+                            (uint16_t)((convertAngleBuf[iter]/90) * (SERVO_21_MAX_ANGLE-SERVO_21_MIN_ANGLE)
+                                       + SERVO_21_MIN_ANGLE);break;
+            case 22:angleBuf[iter] =
+                            (uint16_t)((convertAngleBuf[iter]/90) * (SERVO_22_MAX_ANGLE-SERVO_22_MIN_ANGLE)
+                                       + SERVO_22_MIN_ANGLE);break;
+            case 23:angleBuf[iter] =
+                            (uint16_t)((convertAngleBuf[iter]/90) * (SERVO_23_MAX_ANGLE-SERVO_23_MIN_ANGLE)
+                                       + SERVO_23_MIN_ANGLE);break;
+            case 24:angleBuf[iter] =
+                            (uint16_t)((convertAngleBuf[iter]/90) * (SERVO_24_MAX_ANGLE-SERVO_24_MIN_ANGLE)
+                                       + SERVO_24_MIN_ANGLE);break;
+            case 25:angleBuf[iter] =
+                            (uint16_t)((convertAngleBuf[iter]/90) * (SERVO_25_MAX_ANGLE-SERVO_25_MIN_ANGLE)
+                                       + SERVO_25_MIN_ANGLE);break;
+            case 26:angleBuf[iter] =
+                            (uint16_t)((convertAngleBuf[iter]/90) * (SERVO_26_MAX_ANGLE-SERVO_26_MIN_ANGLE)
+                                       + SERVO_26_MIN_ANGLE);break;
+            case 27:angleBuf[iter] =
+                            (uint16_t)((convertAngleBuf[iter]/90) * (SERVO_27_MAX_ANGLE-SERVO_27_MIN_ANGLE)
+                                       + SERVO_27_MIN_ANGLE);break;
+            case 28:angleBuf[iter] =
+                            (uint16_t)((convertAngleBuf[iter]/90) * (SERVO_28_MAX_ANGLE-SERVO_28_MIN_ANGLE)
+                                       + SERVO_28_MIN_ANGLE);break;
+            case 29:angleBuf[iter] =
+                            (uint16_t)((convertAngleBuf[iter]/90) * (SERVO_29_MAX_ANGLE-SERVO_29_MIN_ANGLE)
+                                       + SERVO_29_MIN_ANGLE);break;
+            case 30:angleBuf[iter] =
+                            (uint16_t)((convertAngleBuf[iter]/90) * (SERVO_30_MAX_ANGLE-SERVO_30_MIN_ANGLE)
+                                       + SERVO_30_MIN_ANGLE);break;
+            default:;break;
         }
     }
 }
