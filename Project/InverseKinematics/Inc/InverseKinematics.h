@@ -7,16 +7,6 @@
 #define LIMB_A_LENGTH 46.5
 #define LIMB_B_LENGTH 77
 #define LIMB_C_LENGTH 190
-typedef struct coordinate{
-    double X;
-    double Y;
-    double Z;
-}coordinate;
-typedef struct theta{
-    double thetaA;
-    double thetaB;
-    double thetaC;
-}theta;
-void coordinateToTheta(theta *thetaForJoint,double X,double Y,double Z);
-void thetaToCoordinate(coordinate *coordinateForTip,double thetaA,double thetaB,double thetaC);
+inline void coordinateToThetaArray(double *thetaForJoint,const double * coordinateForTip);
+inline void thetaToCoordinateArray(double *coordinateForTip,const double * thetaForJoint);
 #endif //UARTTEST_INVERSEKINEMATICS_H

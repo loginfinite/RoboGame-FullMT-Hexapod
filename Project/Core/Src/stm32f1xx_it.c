@@ -64,8 +64,6 @@ extern UART_HandleTypeDef SERVO_UART;
 /* USER CODE BEGIN EV */
 char BLUETOOH_RX_BUF[400];
 char SERVO_RX_BUF[400];
-uint16_t AngleBuf[18];
-double ConVertAngleBuf[18];
 int isUartRxCompleted;
 int Command_Flag=0;
 int CMD_BUF[4];

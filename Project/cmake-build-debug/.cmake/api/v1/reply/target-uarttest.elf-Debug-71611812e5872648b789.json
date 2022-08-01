@@ -154,47 +154,47 @@
 			[
 				{
 					"backtrace" : 10,
-					"path" : "C:/Users/35802/Desktop/stm/uarttest/Core/Inc"
+					"path" : "C:/Users/35802/Desktop/RobogameHex/Project/Core/Inc"
 				},
 				{
 					"backtrace" : 10,
-					"path" : "C:/Users/35802/Desktop/stm/uarttest/Drivers/STM32F1xx_HAL_Driver/Inc"
+					"path" : "C:/Users/35802/Desktop/RobogameHex/Project/Drivers/STM32F1xx_HAL_Driver/Inc"
 				},
 				{
 					"backtrace" : 10,
-					"path" : "C:/Users/35802/Desktop/stm/uarttest/Drivers/STM32F1xx_HAL_Driver/Inc/Legacy"
+					"path" : "C:/Users/35802/Desktop/RobogameHex/Project/Drivers/STM32F1xx_HAL_Driver/Inc/Legacy"
 				},
 				{
 					"backtrace" : 10,
-					"path" : "C:/Users/35802/Desktop/stm/uarttest/Drivers/CMSIS/Device/ST/STM32F1xx/Include"
+					"path" : "C:/Users/35802/Desktop/RobogameHex/Project/Drivers/CMSIS/Device/ST/STM32F1xx/Include"
 				},
 				{
 					"backtrace" : 10,
-					"path" : "C:/Users/35802/Desktop/stm/uarttest/Drivers/CMSIS/Include"
+					"path" : "C:/Users/35802/Desktop/RobogameHex/Project/Drivers/CMSIS/Include"
 				},
 				{
 					"backtrace" : 10,
-					"path" : "C:/Users/35802/Desktop/stm/uarttest/Servo/Inc"
+					"path" : "C:/Users/35802/Desktop/RobogameHex/Project/Servo/Inc"
 				},
 				{
 					"backtrace" : 10,
-					"path" : "C:/Users/35802/Desktop/stm/uarttest/Servo/Src"
+					"path" : "C:/Users/35802/Desktop/RobogameHex/Project/Servo/Src"
 				},
 				{
 					"backtrace" : 10,
-					"path" : "C:/Users/35802/Desktop/stm/uarttest/HexaPod/Inc"
+					"path" : "C:/Users/35802/Desktop/RobogameHex/Project/HexaPod/Inc"
 				},
 				{
 					"backtrace" : 10,
-					"path" : "C:/Users/35802/Desktop/stm/uarttest/HexaPod/Src"
+					"path" : "C:/Users/35802/Desktop/RobogameHex/Project/HexaPod/Src"
 				},
 				{
 					"backtrace" : 10,
-					"path" : "C:/Users/35802/Desktop/stm/uarttest/InverseKinematics/Inc"
+					"path" : "C:/Users/35802/Desktop/RobogameHex/Project/InverseKinematics/Inc"
 				},
 				{
 					"backtrace" : 10,
-					"path" : "C:/Users/35802/Desktop/stm/uarttest/InverseKinematics/Src"
+					"path" : "C:/Users/35802/Desktop/RobogameHex/Project/InverseKinematics/Src"
 				}
 			],
 			"language" : "C",
@@ -303,47 +303,47 @@
 			[
 				{
 					"backtrace" : 10,
-					"path" : "C:/Users/35802/Desktop/stm/uarttest/Core/Inc"
+					"path" : "C:/Users/35802/Desktop/RobogameHex/Project/Core/Inc"
 				},
 				{
 					"backtrace" : 10,
-					"path" : "C:/Users/35802/Desktop/stm/uarttest/Drivers/STM32F1xx_HAL_Driver/Inc"
+					"path" : "C:/Users/35802/Desktop/RobogameHex/Project/Drivers/STM32F1xx_HAL_Driver/Inc"
 				},
 				{
 					"backtrace" : 10,
-					"path" : "C:/Users/35802/Desktop/stm/uarttest/Drivers/STM32F1xx_HAL_Driver/Inc/Legacy"
+					"path" : "C:/Users/35802/Desktop/RobogameHex/Project/Drivers/STM32F1xx_HAL_Driver/Inc/Legacy"
 				},
 				{
 					"backtrace" : 10,
-					"path" : "C:/Users/35802/Desktop/stm/uarttest/Drivers/CMSIS/Device/ST/STM32F1xx/Include"
+					"path" : "C:/Users/35802/Desktop/RobogameHex/Project/Drivers/CMSIS/Device/ST/STM32F1xx/Include"
 				},
 				{
 					"backtrace" : 10,
-					"path" : "C:/Users/35802/Desktop/stm/uarttest/Drivers/CMSIS/Include"
+					"path" : "C:/Users/35802/Desktop/RobogameHex/Project/Drivers/CMSIS/Include"
 				},
 				{
 					"backtrace" : 10,
-					"path" : "C:/Users/35802/Desktop/stm/uarttest/Servo/Inc"
+					"path" : "C:/Users/35802/Desktop/RobogameHex/Project/Servo/Inc"
 				},
 				{
 					"backtrace" : 10,
-					"path" : "C:/Users/35802/Desktop/stm/uarttest/Servo/Src"
+					"path" : "C:/Users/35802/Desktop/RobogameHex/Project/Servo/Src"
 				},
 				{
 					"backtrace" : 10,
-					"path" : "C:/Users/35802/Desktop/stm/uarttest/HexaPod/Inc"
+					"path" : "C:/Users/35802/Desktop/RobogameHex/Project/HexaPod/Inc"
 				},
 				{
 					"backtrace" : 10,
-					"path" : "C:/Users/35802/Desktop/stm/uarttest/HexaPod/Src"
+					"path" : "C:/Users/35802/Desktop/RobogameHex/Project/HexaPod/Src"
 				},
 				{
 					"backtrace" : 10,
-					"path" : "C:/Users/35802/Desktop/stm/uarttest/InverseKinematics/Inc"
+					"path" : "C:/Users/35802/Desktop/RobogameHex/Project/InverseKinematics/Inc"
 				},
 				{
 					"backtrace" : 10,
-					"path" : "C:/Users/35802/Desktop/stm/uarttest/InverseKinematics/Src"
+					"path" : "C:/Users/35802/Desktop/RobogameHex/Project/InverseKinematics/Src"
 				}
 			],
 			"language" : "ASM",
@@ -368,7 +368,7 @@
 			},
 			{
 				"backtrace" : 2,
-				"fragment" : "-Wl,-gc-sections,--print-memory-usage,-Map=C:/Users/35802/Desktop/stm/uarttest/cmake-build-debug/uarttest.map",
+				"fragment" : "-Wl,-gc-sections,--print-memory-usage,-Map=C:/Users/35802/Desktop/RobogameHex/Project/cmake-build-debug/uarttest.map",
 				"role" : "flags"
 			},
 			{
@@ -393,7 +393,7 @@
 			},
 			{
 				"backtrace" : 4,
-				"fragment" : "C:/Users/35802/Desktop/stm/uarttest/STM32F103ZETX_FLASH.ld",
+				"fragment" : "C:/Users/35802/Desktop/RobogameHex/Project/STM32F103ZETX_FLASH.ld",
 				"role" : "flags"
 			},
 			{

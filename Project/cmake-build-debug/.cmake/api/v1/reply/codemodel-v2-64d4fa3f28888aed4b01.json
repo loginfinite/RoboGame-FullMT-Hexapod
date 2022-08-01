@@ -39,7 +39,7 @@
 				{
 					"directoryIndex" : 0,
 					"id" : "uarttest.elf::@6890427a1f51a3e7e1df",
-					"jsonFile" : "target-uarttest.elf-Debug-d52c4ff46d5dc5e43e8d.json",
+					"jsonFile" : "target-uarttest.elf-Debug-71611812e5872648b789.json",
 					"name" : "uarttest.elf",
 					"projectIndex" : 0
 				}
@@ -49,8 +49,8 @@
 	"kind" : "codemodel",
 	"paths" : 
 	{
-		"build" : "C:/Users/35802/Desktop/stm/uarttest/cmake-build-debug",
-		"source" : "C:/Users/35802/Desktop/stm/uarttest"
+		"build" : "C:/Users/35802/Desktop/RobogameHex/Project/cmake-build-debug",
+		"source" : "C:/Users/35802/Desktop/RobogameHex/Project"
 	},
 	"version" : 
 	{

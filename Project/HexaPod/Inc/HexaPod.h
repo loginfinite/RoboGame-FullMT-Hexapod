@@ -6,40 +6,60 @@
 #define UARTTEST_HEXAPOD_H
 #include "Servo.h"
 #include "InverseKinematics.h"
-#define ROUND_R 100
+#define STRUCTURE_RADIUS 100
+#define DEFAULT_HEIGHT 100
+#define DEFAULT_LEG_LENGTH 100
+#define TOTAL_LEGS 12
+typedef enum JointIndex{
+    Coxa=0,
+    Femur,
+    Tibia,
+}JointIndex;
+
 typedef enum LegIndex{
     LeftFront=0,
-    LeftMiddle=1,
-    LeftHind=2,
-    RightFront=3,
-    RightMiddle=4,
-    RightHide=5
+    LeftMiddle,
+    LeftHind,
+    RightFront,
+    RightMiddle,
+    RightHind,
+    LeftFrontUpper,
+    LeftMiddleUpper,
+    LeftHindUpper,
+    RightFrontUpper,
+    RightMiddleUpper,
+    RightHideUpper,
+    All
 }LegIndex;
-typedef enum LegState{
-    Lock,
-    Unlock
-}LegState;
 
-typedef struct Leg{
-    LegState state;
-    int legID;
-}Leg;
+typedef enum CoordinateIndex{
+    X=0,
+    Y,
+    Z
+}CoordinateIndex;
+
+typedef enum LegStatus{
+    Lock = 0,
+    Unlock,
+}LegStatus;
 
 typedef struct HexaPod{
-    Leg legs[6];
+    uint16_t RawAngleData[TOTAL_SERVOS_NUM];
+    double convertedAngleData[TOTAL_SERVOS_NUM];
+    double coordinateData[TOTAL_LEGS][3];
+    LegStatus legStatus[TOTAL_LEGS];
+    int mutexRxFromServo;
+    void (*move)(const double ** tipCoordinate, uint16_t Time);
+    void (*unlockLegs)(LegIndex leg);
+    void (*rollStraight)(uint16_t Time, uint16_t scope);
+    void (*rollTurnLeft)(uint16_t Time, uint16_t scope);
+    void (*rollTurnRight)(uint16_t Time, uint16_t scope);
 }HexaPod;
 
-int getLegID(LegIndex index);
-void HexaPod_Init(HexaPod*hexapod);
-void getLegsAngle(LegIndex index);
-void getAllLegsAngle();
-void lockLeg(HexaPod* hexapod, LegIndex index);
-void unlockLeg(HexaPod* hexapod, LegIndex index);
-void unlockAllLegs();
-void lockAllLegs();
-void setLegsDefault();
-void setLegAngle(LegIndex index,double thetaA,double thetaB,double thetaC);
-void setAllLegs(uint16_t *angle,double *theta);
-void setAllMidLeg(uint16_t *angle,double theta);
-void setAllEndLeg(uint16_t *angle,double theta);
+
+static inline void moveLegsByArray(const double *theta, uint16_t Time);
+static inline void unlockLegs(LegIndex leg);
+static void coordinateFrameConvert(double ** centerCoordinateFrame,const double ** tipCoordinateFrame);
+static inline void moveByCoordinate(const double ** Coordinate, uint16_t Time);
+void HexaPod_Init(HexaPod * Robo);
 #endif //UARTTEST_HEXAPOD_H

@@ -9,10 +9,9 @@
 #define GET_HIGH_BYTE(A) ((uint8_t)((A) >> 8))
 //宏函数 获得A的高八位
 
-UART_HandleTypeDef * ServoHuart;
-uint8_t LobotTxBuf[128];  //发送缓存
-uint8_t LobotRxBuf[16];
-uint16_t batteryVolt;
+static UART_HandleTypeDef * ServoHuart;
+static uint8_t LobotTxBuf[128];  //发送缓存
+
 
 void Uart_Init(UART_HandleTypeDef *huart){
     ServoHuart = huart;
@@ -66,6 +65,24 @@ void moveServos(uint8_t Num, uint16_t Time, ...)
     HAL_UART_Transmit(ServoHuart,LobotTxBuf,LobotTxBuf[2] + 2, HAL_MAX_DELAY);
 }
 
+void moveServosByArray(uint8_t Num, uint16_t Time, uint16_t* Position){
+    uint8_t index = 7;
+    uint16_t temp;
+    LobotTxBuf[0] = LobotTxBuf[1] = FRAME_HEADER;      //填充帧头
+    LobotTxBuf[2] = Num * 3 + 5;                //数据长度 = 要控制舵机数 * 3 + 5
+    LobotTxBuf[3] = CMD_SERVO_MOVE;             //舵机移动指令
+    LobotTxBuf[4] = Num;                        //要控制舵机数
+    LobotTxBuf[5] = GET_LOW_BYTE(Time);         //取得时间的低八位
+    LobotTxBuf[6] = GET_HIGH_BYTE(Time);        //取得时间的高八位
+    for (uint8_t i = 0; i < Num; i++) {//从可变参数中取得并循环填充舵机ID和对应目标位置
+        temp = i;//可参数中取得舵机ID
+        LobotTxBuf[index++] = GET_LOW_BYTE(((uint16_t)temp));
+        temp = Position[i];  //可变参数中取得对应目标位置
+        LobotTxBuf[index++] = GET_LOW_BYTE(((uint16_t)temp)); //填充目标位置低八位
+        LobotTxBuf[index++] = GET_HIGH_BYTE(temp);//填充目标位置高八位
+    }
+    HAL_UART_Transmit(ServoHuart,LobotTxBuf,LobotTxBuf[2] + 2, HAL_MAX_DELAY);
+}
 
 void unloadServos(uint8_t Num,uint16_t Time,...){
     uint8_t index = 5;
@@ -85,6 +102,24 @@ void unloadServos(uint8_t Num,uint16_t Time,...){
         LobotTxBuf[index++] = GET_LOW_BYTE(((uint16_t)temp));
     }
     va_end(arg_ptr);  //置空arg_ptr
+    HAL_UART_Transmit(ServoHuart,LobotTxBuf, LobotTxBuf[2] + 2,HAL_MAX_DELAY);    //发送
+}
+
+void unloadServosByArray(uint8_t Num,uint16_t Time, int* ID){
+    uint8_t index = 5;
+    uint8_t i = 0;
+    uint16_t temp;
+
+    LobotTxBuf[0] = LobotTxBuf[1] = FRAME_HEADER;      //填充帧头
+    LobotTxBuf[2] = Num + 3;                //数据长度 = 要控制舵机数 * 3 + 5
+    LobotTxBuf[3] = CMD_SERVO_UNLOAD;             //舵机移动指令
+    LobotTxBuf[4] = Num;                        //要控制舵机数
+
+    for (i = 0; i < Num; i++) {//从可变参数中取得并循环填充舵机ID和对应目标位置
+        temp = ID[i];//可参数中取得舵机ID
+        LobotTxBuf[index++] = GET_LOW_BYTE(((uint16_t)temp));
+    }
+
     HAL_UART_Transmit(ServoHuart,LobotTxBuf, LobotTxBuf[2] + 2,HAL_MAX_DELAY);    //发送
 }
 
@@ -117,7 +152,20 @@ void getServoAngle(uint8_t Num,uint16_t Time,...){
     HAL_UART_Transmit_IT(ServoHuart,LobotTxBuf, LobotTxBuf[2] + 2);    //发送
 }
 
-
+void getServoAngleByArray(uint8_t Num,uint16_t Time, int* ID){
+    uint8_t index = 5;
+    uint8_t i = 0;
+    uint16_t temp;
+    LobotTxBuf[0] = FRAME_HEADER;  //填充帧头
+    LobotTxBuf[1] = FRAME_HEADER;
+    LobotTxBuf[2] = Num+3;
+    LobotTxBuf[3] = CMD_GET_SERVO_ANGLE;
+    for (i = 0; i < Num; i++) {//从可变参数中取得并循环填充舵机ID和对应目标位置
+        temp = ID[i];
+        LobotTxBuf[index++] = GET_LOW_BYTE(((uint16_t)temp));
+    }
+    HAL_UART_Transmit_IT(ServoHuart,LobotTxBuf, LobotTxBuf[2] + 2);    //发送
+}
 
 void convertAngleData(double * convertAngleBuf,uint16_t * angleBuf){
     int iter = 0;

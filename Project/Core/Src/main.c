@@ -15,7 +15,7 @@
   *
   ******************************************************************************
   */
-#include "Servo.h"
+//#include "Servo.h"
 #include "HexaPod.h"
 #include <stdio.h>
 #include <stdarg.h>
@@ -25,8 +25,6 @@
 
 /* Private includes ----------------------------------------------------------*/
 /* USER CODE BEGIN Includes */
-extern int Command_Flag;
-extern int CMD_BUF[4];
 /* USER CODE END Includes */
 
 /* Private typedef -----------------------------------------------------------*/
@@ -51,23 +49,6 @@ UART_HandleTypeDef SERVO_UART;
 /* USER CODE BEGIN PV */
 extern char BLUETOOH_RX_BUF[400];
 extern char SERVO_RX_BUF[400];
-HexaPod hexRobo;
-extern uint16_t AngleBuf[18];
-uint16_t DefaultAngle[18] = {479,435,240,466,496,324,488,574,722,501,429,177,434,475,374,496,456,616};
-double DefaultTheta[18] = {0,15,30,0,15,30,0,15,30,0,15,30,0,15,30,0,15,30};
-double LeftUpTheta[18] = {0,-10,125,0,-10,125,0,-10,125,0,15,30,0,15,30,0,15,30};
-double RightUpTheta[18] = {0,15,30,0,15,30,0,15,30,0,-10,125,0,-10,125,0,-10,125};
-double LeftUpTwistTheta[18] = {10,-10,125,10,-10,125,10,-10,125,0,15,30,0,15,30,0,15,30};
-double LeftDownTwistTheta[18] = {10,15,30,10,15,30,10,15,30,0,15,30,0,15,30,0,15,30};
-double RightUpTwistTheta[18] =  {0,15,30,0,15,30,0,15,30,10,-10,125,10,-10,125,10,-10,125};
-double RightDownTwistTheta[18] = {0,15,30,0,15,30,0,15,30,10,15,30,10,15,30,10,15,30};
-
-double Twist1[18] = {7,8,100,7,8,100,7,8,100,0,15,30,0,15,30,0,15,30};
-double Twist2[18] = {7,15,30,7,15,30,7,15,30,0,15,30,0,15,30,0,15,30};
-double Twist3[18] = {7,15,30,7,15,30,7,15,30,7,8,100,7,8,100,7,8,100};
-double Twist4[18] = {0,15,30,0,15,30,0,15,30,7,8,100,7,8,100,7,8,100};
-double Twist5[18] = {0,15,30,0,15,30,0,15,30,7,15,30,7,15,30,7,15,30};
-double Twist6[18] = {7,8,100,7,8,100,7,8,100,7,15,30,7,15,30,7,15,30};
 /* USER CODE END PV */
 
 /* Private function prototypes -----------------------------------------------*/
@@ -84,52 +65,7 @@ static void MX_USART3_UART_Init(void);
 /* Private user code ---------------------------------------------------------*/
 /* USER CODE BEGIN 0 */
 
-void sendAngleData(void ){
 
-    int i=0;
-    char str[]="Leg:XX||JointA:XXX,JointB:XXX,JointC:XXX\n";
-    char sendingBuf[60];
-    for(i=0;i<60;++i){
-        sendingBuf[i]='\0';
-    }
-    for(i=0;i<18;i+=3){
-
-        double BUF_NUM_1,BUF_NUM_2,BUF_NUM_3;
-        BUF_NUM_1 = ConVertAngleBuf[i];
-        BUF_NUM_2 = ConVertAngleBuf[i+1];
-        BUF_NUM_3 = ConVertAngleBuf[i+2];
-        sprintf(sendingBuf,"Leg:XX--JointA:%.2f--JointB:%.2f--JointC:%.2f\n\0",BUF_NUM_1,BUF_NUM_2,BUF_NUM_3);
-        switch (i) {
-            case 0:
-                sendingBuf[4] ='L';
-                sendingBuf[5] ='F';
-                break;
-            case 3:
-                sendingBuf[4] ='R';
-                sendingBuf[5] ='M';
-                break;
-            case 6:
-                sendingBuf[4] ='L';
-                sendingBuf[5] ='H';
-                break;
-            case 9:
-                sendingBuf[4] ='R';
-                sendingBuf[5] ='F';
-                break;
-            case 12:
-                sendingBuf[4] ='L';
-                sendingBuf[5] ='M';
-                break;
-            case 15:
-                sendingBuf[4] ='R';
-                sendingBuf[5] ='H';
-                break;
-            default:;break;
-        }
-        HAL_UART_Transmit(&BLUETOOH_UART,sendingBuf,60,HAL_MAX_DELAY);
-        HAL_Delay(50);
-    }
-}
 /* USER CODE END 0 */
 
 /**
@@ -146,6 +82,7 @@ int main(void)
 
   /* Reset of all peripherals, Initializes the Flash interface and the Systick. */
   HAL_Init();
+
 
   /* USER CODE BEGIN Init */
 
@@ -165,7 +102,6 @@ int main(void)
   MX_USART3_UART_Init();
   /* USER CODE BEGIN 2 */
 
-  char* data0 = "stm init...\n\r";
     HAL_UART_Transmit(&BLUETOOH_UART,data0,13,HAL_MAX_DELAY);
     __HAL_UART_CLEAR_IDLEFLAG(&SERVO_UART);//娓呴櫎绌洪棽涓柇鏍囧織
     __HAL_UART_ENABLE_IT(&SERVO_UART, UART_IT_IDLE | UART_IT_RXNE);//�??鍚┖闂蹭腑鏂拰鎺ユ敹涓�?
@@ -173,9 +109,9 @@ int main(void)
     __HAL_UART_CLEAR_IDLEFLAG(&BLUETOOH_UART);//娓呴櫎绌洪棽涓柇鏍囧織
     __HAL_UART_ENABLE_IT(&BLUETOOH_UART, UART_IT_IDLE | UART_IT_RXNE);//�??鍚┖闂蹭腑鏂拰鎺ユ敹涓�?
     HAL_UART_Receive_IT(&BLUETOOH_UART, (uint8_t *)BLUETOOH_RX_BUF, 100);//�??鍚竴娆′腑鏂紡鎺ユ敹
-
+    HexaPod  hexaRobo;
     Uart_Init(&SERVO_UART);
-    HexaPod_Init(&hexRobo);
+    HexaPod_Init(&hexaRobo);
     //setLegsDefault();
     //setLegsDefault();
   /* USER CODE END 2 */
@@ -183,77 +119,9 @@ int main(void)
 
 
     /* Infinite loop */
-  while (1)switch (Command_Flag) {
+  while (1){
 
-          {
-          case 2:
-              setAllLegs(AngleBuf,DefaultTheta);
-              Command_Flag = 1;
-              break;
-          case 3:
-              lockAllLegs();
-              Command_Flag = 1;
-              break;
-          case 4:
-              unlockAllLegs();
-              Command_Flag=1;
-              break;
-          case 5:
-              getAllLegsAngle();
-              sendAngleData();
-              Command_Flag=1;
-              break;
-          case 6:
-              switch (CMD_BUF[0]) {
-                  case LeftFront:
-                      unlockLeg(&hexRobo, LeftFront);
-                      break;
-                  case LeftMiddle:
-                      unlockLeg(&hexRobo, LeftMiddle);
-                      break;
-                  case LeftHind:
-                      unlockLeg(&hexRobo, LeftHind);
-                      break;
-                  case RightFront:
-                      unlockLeg(&hexRobo, RightFront);
-                      break;
-                  case RightMiddle:
-                      unlockLeg(&hexRobo, RightMiddle);
-                      break;
-                  case RightHide:
-                      unlockLeg(&hexRobo, RightHide);
-                  default:break;
-              }
-              Command_Flag = 1;
-              break;
-          case 7:
-              setLegAngle(CMD_BUF[0],CMD_BUF[1],CMD_BUF[2],CMD_BUF[3]);
-              Command_Flag = 1;
-              break;
-          case 8:
-              setAllMidLeg(AngleBuf,CMD_BUF[0]);
-              Command_Flag = 1;
-              break;
-          case 9:
-              setAllEndLeg(AngleBuf,CMD_BUF[0]);
-              Command_Flag = 1;
-              break;
-          case 10:
-              setAllLegs(AngleBuf,Twist1);
-              HAL_Delay(1000);
-              setAllLegs(AngleBuf,Twist2);
-              HAL_Delay(1000);
-              setAllLegs(AngleBuf,Twist3);
-              HAL_Delay(1000);
-              setAllLegs(AngleBuf,Twist4);
-              HAL_Delay(1000);
-              setAllLegs(AngleBuf,Twist5);
-              HAL_Delay(1000);
-              setAllLegs(AngleBuf,Twist6);
-              HAL_Delay(1000);
-              Command_Flag = 1;
-              break;
-          default:;
+
       }
     /* USER CODE END WHILE */
 
