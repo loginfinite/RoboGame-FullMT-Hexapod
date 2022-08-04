@@ -3,10 +3,32 @@
 //
 #include "HexaPod.h"
 #include <math.h>
-static inline void moveLegsByArray(const double *theta, uint16_t Time){
-    uint16_t  rawAngle[TOTAL_SERVOS_NUM];
+void HexaPod_Init(HexaPod * Robo, runMode mode){
+    Robo->mode = mode;
+    Robo->move = moveLegsByCoordinate;
+    Robo->unlockLegs = unlockLegs;
+    Robo->getAngle = getLegsAngle;
+    Robo->moveSingleLeg = moveSingleLeg;
+}
+
+static inline void moveSingleLeg(LegIndex leg,const double *theta, uint16_t Time){
+    double LegCoxaServoID  = 3*leg+Coxa;
+    double LegFemurServoID = 3*leg+Femur;
+    double LegTibiaServoID = 3*leg+Tibia;
+    if(leg<=LeftFrontUpper){
+        moveServos(3,Time,LegCoxaServoID,theta[0],
+                            LegFemurServoID,theta[1],
+                            LegTibiaServoID,theta[2]);
+    }else{
+        moveServos(2,Time,LegCoxaServoID,theta[0],
+                                LegFemurServoID,theta[1]);
+    }
+}
+
+static inline void moveLegsByAngle(const double *theta, uint16_t Time){
+    uint16_t  rawAngle[CRAWL_LEGS * 3];
     deConvertAngle(theta, rawAngle);
-    moveServosByArray(TOTAL_SERVOS_NUM, Time,rawAngle);
+    moveServosByArray(CRAWL_LEGS * 3, Time,rawAngle);
 }
 
 static inline void unlockLegs(LegIndex leg) {
@@ -45,9 +67,9 @@ static void coordinateFrameConvert(double ** centerCoordinate,const double ** ti
     centerCoordinate[RightHind][Z] = DEFAULT_HEIGHT - tipCoordinate[LeftFront][Z];
 }
 
-static inline void moveByCoordinate(const double ** moveCoordinate, uint16_t Time){
-    double ** Coordinate[TOTAL_LEGS];
-    double Theta[TOTAL_LEGS * 3];
+static inline void moveLegsByCoordinate(const double ** moveCoordinate, uint16_t Time){
+    double ** Coordinate[CRAWL_LEGS];
+    double Theta[CRAWL_LEGS * 3];
     coordinateFrameConvert((double **)Coordinate, moveCoordinate);
     coordinateToThetaArray(&Theta[LeftFront],*Coordinate[LeftFront]);
     coordinateToThetaArray(&Theta[LeftHind],*Coordinate[LeftHind]);
@@ -55,10 +77,18 @@ static inline void moveByCoordinate(const double ** moveCoordinate, uint16_t Tim
     coordinateToThetaArray(&Theta[RightFront],*Coordinate[RightFront]);
     coordinateToThetaArray(&Theta[RightHind],*Coordinate[RightHind]);
     coordinateToThetaArray(&Theta[RightMiddle],*Coordinate[RightMiddle]);
-    moveLegsByArray(Theta,Time);
+    moveLegsByAngle(Theta,Time);
 }
 
-void HexaPod_Init(HexaPod * Robo){
-    Robo->move = moveByCoordinate;
-    Robo->unlockLegs = unlockLegs;
+static inline void getLegsAngle(){
+    getServoAngle(18,0,
+                  1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16,17,18,
+                  19,20,21,22,23,24,25,26,27,28,29,30);
 }
+
+static void crawStraight(uint16_t Time, uint16_t scope){
+
+}
+
+
+

@@ -20,7 +20,7 @@ void moveServo(uint8_t servoID, uint16_t Position, uint16_t Time);
 void moveServos(uint8_t Num, uint16_t Time, ...);
 void unloadServosByArray(uint8_t Num,uint16_t Time, int* ID);
 void moveServosByArray(uint8_t Num, uint16_t Time, uint16_t* Position);
-void getServoAngleByArray(uint8_t Num,uint16_t Time, int* ID);
+void getServoAngleByArray(uint8_t Num,uint16_t Time, const int* ID);
 void getBatteryVoltage(void);
 void getServoAngle(uint8_t Num,uint16_t Time,...);
 void convertAngle(double * AngleBuf, uint16_t * ConvertAngleBuf);

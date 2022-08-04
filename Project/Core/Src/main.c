@@ -43,17 +43,17 @@
 
 /* Private variables ---------------------------------------------------------*/
 UART_HandleTypeDef huart1;
-UART_HandleTypeDef BLUETOOH_UART;
+UART_HandleTypeDef BLUETOOTH_UART;
 UART_HandleTypeDef SERVO_UART;
-
 /* USER CODE BEGIN PV */
 extern char BLUETOOH_RX_BUF[400];
 extern char SERVO_RX_BUF[400];
+extern char CMD_BUF[400];
+extern HexaPod hexaRobo;
 /* USER CODE END PV */
 
 /* Private function prototypes -----------------------------------------------*/
 void SystemClock_Config(void);
-void sendAngleData(void );
 static void MX_GPIO_Init(void);
 static void MX_USART1_UART_Init(void);
 static void MX_USART2_UART_Init(void);
@@ -100,33 +100,36 @@ int main(void)
   MX_USART1_UART_Init();
   MX_USART2_UART_Init();
   MX_USART3_UART_Init();
-  /* USER CODE BEGIN 2 */
 
-    HAL_UART_Transmit(&BLUETOOH_UART,data0,13,HAL_MAX_DELAY);
-    __HAL_UART_CLEAR_IDLEFLAG(&SERVO_UART);//娓呴櫎绌洪棽涓柇鏍囧織
-    __HAL_UART_ENABLE_IT(&SERVO_UART, UART_IT_IDLE | UART_IT_RXNE);//�??鍚┖闂蹭腑鏂拰鎺ユ敹涓�?
-    HAL_UART_Receive_IT(&SERVO_UART, (uint8_t *)SERVO_RX_BUF, 100);//�??鍚竴娆′腑鏂紡鎺ユ敹
-    __HAL_UART_CLEAR_IDLEFLAG(&BLUETOOH_UART);//娓呴櫎绌洪棽涓柇鏍囧織
-    __HAL_UART_ENABLE_IT(&BLUETOOH_UART, UART_IT_IDLE | UART_IT_RXNE);//�??鍚┖闂蹭腑鏂拰鎺ユ敹涓�?
-    HAL_UART_Receive_IT(&BLUETOOH_UART, (uint8_t *)BLUETOOH_RX_BUF, 100);//�??鍚竴娆′腑鏂紡鎺ユ敹
-    HexaPod  hexaRobo;
+  /* USER CODE BEGIN 2 */
+    char * initInfo = "Stm init......\n\0";
+    HAL_UART_Transmit(&BLUETOOTH_UART,initInfo,16,HAL_MAX_DELAY);
+    __HAL_UART_CLEAR_IDLEFLAG(&SERVO_UART);
+    __HAL_UART_ENABLE_IT(&SERVO_UART, UART_IT_IDLE | UART_IT_RXNE);
+    HAL_UART_Receive_IT(&SERVO_UART, (uint8_t *)SERVO_RX_BUF, 100);
+    __HAL_UART_CLEAR_IDLEFLAG(&BLUETOOTH_UART);
+    __HAL_UART_ENABLE_IT(&BLUETOOTH_UART, UART_IT_IDLE | UART_IT_RXNE);
+    HAL_UART_Receive_IT(&BLUETOOTH_UART, (uint8_t *)BLUETOOH_RX_BUF, 100);
+
     Uart_Init(&SERVO_UART);
-    HexaPod_Init(&hexaRobo);
-    //setLegsDefault();
-    //setLegsDefault();
+    HexaPod_Init(&hexaRobo, debug);
   /* USER CODE END 2 */
     /* USER CODE BEGIN WHILE */
-
-
     /* Infinite loop */
-  while (1){
+    while (1){
+        hexaRobo.Command = idle;
+        while (1){
+            switch (hexaRobo.Command) {
+                    case idle:
 
-
-      }
+                        break;
+                }
+            }
+    }
     /* USER CODE END WHILE */
 
     /* USER CODE BEGIN 3 */
-  }
+
   /* USER CODE END 3 */
 }
 
@@ -214,15 +217,15 @@ static void MX_USART2_UART_Init(void)
   /* USER CODE BEGIN USART2_Init 1 */
 
   /* USER CODE END USART2_Init 1 */
-  BLUETOOH_UART.Instance = USART2;
-  BLUETOOH_UART.Init.BaudRate = 9600;
-  BLUETOOH_UART.Init.WordLength = UART_WORDLENGTH_8B;
-  BLUETOOH_UART.Init.StopBits = UART_STOPBITS_1;
-  BLUETOOH_UART.Init.Parity = UART_PARITY_NONE;
-  BLUETOOH_UART.Init.Mode = UART_MODE_TX_RX;
-  BLUETOOH_UART.Init.HwFlowCtl = UART_HWCONTROL_NONE;
-  BLUETOOH_UART.Init.OverSampling = UART_OVERSAMPLING_16;
-  if (HAL_UART_Init(&BLUETOOH_UART) != HAL_OK)
+  BLUETOOTH_UART.Instance = USART2;
+  BLUETOOTH_UART.Init.BaudRate = 9600;
+  BLUETOOTH_UART.Init.WordLength = UART_WORDLENGTH_8B;
+  BLUETOOTH_UART.Init.StopBits = UART_STOPBITS_1;
+  BLUETOOTH_UART.Init.Parity = UART_PARITY_NONE;
+  BLUETOOTH_UART.Init.Mode = UART_MODE_TX_RX;
+  BLUETOOTH_UART.Init.HwFlowCtl = UART_HWCONTROL_NONE;
+  BLUETOOTH_UART.Init.OverSampling = UART_OVERSAMPLING_16;
+  if (HAL_UART_Init(&BLUETOOTH_UART) != HAL_OK)
   {
     Error_Handler();
   }

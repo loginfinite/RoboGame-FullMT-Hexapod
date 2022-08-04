@@ -400,6 +400,11 @@
 				"backtrace" : 4,
 				"fragment" : "Servo/Inc/ServoDeviation.h",
 				"role" : "flags"
+			},
+			{
+				"backtrace" : 4,
+				"fragment" : "movementsTable/movementsTable.h",
+				"role" : "flags"
 			}
 		],
 		"language" : "C"
@@ -474,7 +479,8 @@
 				78,
 				80,
 				82,
-				83
+				83,
+				86
 			]
 		},
 		{
@@ -973,6 +979,11 @@
 			"backtrace" : 1,
 			"path" : "STM32F103ZETX_FLASH.ld",
 			"sourceGroupIndex" : 2
+		},
+		{
+			"backtrace" : 1,
+			"path" : "movementsTable/movementsTable.h",
+			"sourceGroupIndex" : 0
 		}
 	],
 	"type" : "EXECUTABLE"

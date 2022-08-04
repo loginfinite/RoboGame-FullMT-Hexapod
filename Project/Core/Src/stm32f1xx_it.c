@@ -59,15 +59,12 @@
 
 /* External variables --------------------------------------------------------*/
 extern UART_HandleTypeDef huart1;
-extern UART_HandleTypeDef BLUETOOH_UART;
+extern UART_HandleTypeDef BLUETOOTH_UART;
 extern UART_HandleTypeDef SERVO_UART;
 /* USER CODE BEGIN EV */
 char BLUETOOH_RX_BUF[400];
 char SERVO_RX_BUF[400];
-int isUartRxCompleted;
-int Command_Flag=0;
-int CMD_BUF[4];
-extern HexaPod hexRobo;
+HexaPod hexRobo;
 /* USER CODE END EV */
 
 /******************************************************************************/
@@ -230,19 +227,17 @@ void USART2_IRQHandler(void)
   /* USER CODE BEGIN USART2_IRQn 0 */
 
   /* USER CODE END USART2_IRQn 0 */
-  HAL_UART_IRQHandler(&BLUETOOH_UART);
+  HAL_UART_IRQHandler(&BLUETOOTH_UART);
   /* USER CODE BEGIN USART2_IRQn 1 */
-  if (__HAL_UART_GET_FLAG(&BLUETOOH_UART, UART_FLAG_IDLE) && __HAL_UART_GET_IT_SOURCE(&BLUETOOH_UART, UART_IT_IDLE)){// 确认产生了串口空闲中断{
-      __HAL_UART_CLEAR_IDLEFLAG(&BLUETOOH_UART); // 清除空闲中断标志
-      HAL_UART_AbortReceive_IT(&BLUETOOH_UART); // 终止中断式接
-      int bluetoohrev =0;
-
+  if (__HAL_UART_GET_FLAG(&BLUETOOTH_UART, UART_FLAG_IDLE) && __HAL_UART_GET_IT_SOURCE(&BLUETOOTH_UART, UART_IT_IDLE)){// 确认产生了串口空闲中断{
+      __HAL_UART_CLEAR_IDLEFLAG(&BLUETOOTH_UART); // 清除空闲中断标志
+      HAL_UART_AbortReceive_IT(&BLUETOOTH_UART); // 终止中断式接
+      int bluetoothrev =0;
       /***数据处理的部***/
-      bluetoohrev = BLUETOOH_DATA_PROCESSER(BLUETOOH_RX_BUF);
+      bluetoothrev = BLUETOOH_DATA_PROCESSER(BLUETOOH_RX_BUF);
       char * revMesg = "command receive\n";
-      HAL_UART_Transmit_IT(&BLUETOOH_UART,revMesg,17);
-
-      HAL_UART_Receive_IT(&BLUETOOH_UART,BLUETOOH_RX_BUF, 100); // �??启一次新的中断式接收
+      HAL_UART_Transmit_IT(&BLUETOOTH_UART,revMesg,17);
+      HAL_UART_Receive_IT(&BLUETOOTH_UART,BLUETOOH_RX_BUF, 100); // 开启一次新的中断式接收
 }
   /* USER CODE END USART2_IRQn 1 */
 }
@@ -259,106 +254,37 @@ void USART3_IRQHandler(void)
   /* USER CODE BEGIN USART3_IRQn 1 */
     if (__HAL_UART_GET_FLAG(&SERVO_UART, UART_FLAG_IDLE) && __HAL_UART_GET_IT_SOURCE(&SERVO_UART, UART_IT_IDLE)){// 确认产生了串口空闲中断{
         __HAL_UART_CLEAR_IDLEFLAG(&SERVO_UART); // 清除空闲中断标志
-        HAL_UART_AbortReceive_IT(&SERVO_UART); // 终止中断式接�??
+        HAL_UART_AbortReceive_IT(&SERVO_UART);
         SERVO_DATA_PROCESSER(SERVO_RX_BUF);
-        HAL_UART_Receive_IT(&SERVO_UART,SERVO_RX_BUF, 100); // �??启一次新的中断式接收
+        HAL_UART_Receive_IT(&SERVO_UART,SERVO_RX_BUF, 100); // 启一次新的中断式接收
     }
-
   /* USER CODE END USART3_IRQn 1 */
 }
-
 /* USER CODE BEGIN 1 */
 int BLUETOOH_DATA_PROCESSER(char* dataBuf){
-//    if(dataBuf[0]!=FRAME_HEAD || dataBuf[1] != FRAME_HEAD){
-//        return -1;
-//    }
-    int Num = dataBuf[1];
-    int CMDType = dataBuf[0];
-    char c;
-    switch (CMDType) {
-        case BLUETOOH_CMD_GET_ANGLE:
-            return 1;
-        case '2':
-            Command_Flag = 2;
-            return 2;
-            break;
-        case '3':
-            Command_Flag = 3;
-            return 3;
-            ;break;
-        case '4':
-            Command_Flag = 4;
-            return 4;
-            break;
-        case '5':
-            Command_Flag = 5;
-            return 5;
-            break;
-        case 'u':
-            Command_Flag = 6;
-            sscanf(&dataBuf[0],"%c %d",&c,&CMD_BUF[0]);
-            return 6;
-            break;
-        case 's':
-            Command_Flag = 7;
-            sscanf(&dataBuf[0],"%c %d %d %d %d",&c,&CMD_BUF[0],&CMD_BUF[1],&CMD_BUF[2],&CMD_BUF[3]);
-            return 7;
-            break;
-        case 'm':
-            Command_Flag = 8;
-            sscanf(&dataBuf[0],"%c %d",&c,&CMD_BUF[0]);
-            return 8;
-            break;
-        case 'e':
-            Command_Flag = 9;
-            sscanf(&dataBuf[0],"%c %d",&c,&CMD_BUF[0]);
-            return 9;
-            break;
-        case 'a':
-            Command_Flag = 10;
-            return 10;
-            break;
-        default:
-            Command_Flag = 1;
-            return -2;
-    }
-}
 
+
+
+
+
+
+
+}
 int SERVO_DATA_PROCESSER(char* dataBuf){
-    isUartRxCompleted = 0;
-    int servoNum = 0;
-    int i=0;
-    int id;
-    int angle;
-    if(dataBuf[0]==FRAME_HEADER&&dataBuf[1]==FRAME_HEADER){
-        switch (dataBuf[3]){
-            case CMD_GET_SERVO_ANGLE:
-                servoNum = dataBuf[4];
-                for(i=0;i<servoNum;++i){
-                    id = dataBuf[5+i*3];
-                    angle = (
-                            ((uint16_t)dataBuf[6+i*3]) | (((uint16_t)dataBuf[7+i*3])<<8)
-                            );
-                    AngleBuf[id-1] = angle;
-                }
-                ;break;
-            default:
-                isUartRxCompleted = 1;
-                return -1;
-        }
-        isUartRxCompleted = 1;
-        return 1;
-    }else{
-        isUartRxCompleted = 1;
-        return -1;
-    }
+
+
+
+
+
+
+
 }
 
 void HAL_UART_RxCpltCallback(UART_HandleTypeDef *huart)
 {
     if(huart == &SERVO_UART){
 
-    }else if(huart == &BLUETOOH_UART){
+    }else if(huart == &BLUETOOTH_UART){
 
     }else{
 

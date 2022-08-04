@@ -152,7 +152,7 @@ void getServoAngle(uint8_t Num,uint16_t Time,...){
     HAL_UART_Transmit_IT(ServoHuart,LobotTxBuf, LobotTxBuf[2] + 2);    //发送
 }
 
-void getServoAngleByArray(uint8_t Num,uint16_t Time, int* ID){
+void getServoAngleByArray(uint8_t Num,uint16_t Time, const int* ID){
     uint8_t index = 5;
     uint8_t i = 0;
     uint16_t temp;
