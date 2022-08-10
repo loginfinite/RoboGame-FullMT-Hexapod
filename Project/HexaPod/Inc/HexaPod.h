@@ -50,7 +50,11 @@ typedef enum runMode{
 }runMode;
 
 typedef enum CommandType{
-    idle
+    idle,
+    cmdTest,
+    getAngle,
+    setAngle,
+    unlockLeg,
 }CommandType;
 
 typedef struct HexaPod{
@@ -59,6 +63,7 @@ typedef struct HexaPod{
     double coordinateData[TOTAL_LEGS][3];
     LegStatus legStatus[TOTAL_LEGS];
     int mutexRxFromServo;
+    int isMsgReceive;
     CommandType Command;
     runMode mode;
 
@@ -76,12 +81,12 @@ typedef struct HexaPod{
     void (*rollTurnRight)(uint16_t Time, uint16_t scope);
 }HexaPod;
 
-static inline void moveSingleLeg(LegIndex leg,const double *theta, uint16_t Time);
+
 static inline void unlockLegs(LegIndex leg);
 static inline void getLegsAngle();
 
+static inline void moveSingleLeg(LegIndex leg,const double *theta, uint16_t Time);
 static void coordinateFrameConvert(double ** centerCoordinateFrame,const double ** tipCoordinateFrame);
-
 static inline void moveLegsByAngle(const double *theta, uint16_t Time);
 static inline void moveLegsByCoordinate(const double ** Coordinate, uint16_t Time);
 

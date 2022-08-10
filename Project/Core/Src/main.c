@@ -48,7 +48,7 @@ UART_HandleTypeDef SERVO_UART;
 /* USER CODE BEGIN PV */
 extern char BLUETOOH_RX_BUF[400];
 extern char SERVO_RX_BUF[400];
-extern char CMD_BUF[400];
+extern char CMD_ARG_BUF[100];
 extern HexaPod hexaRobo;
 /* USER CODE END PV */
 
@@ -120,9 +120,28 @@ int main(void)
         hexaRobo.Command = idle;
         while (1){
             switch (hexaRobo.Command) {
-                    case idle:
-
-                        break;
+                case idle:
+                    break;
+                case getAngle:
+                    hexaRobo.isMsgReceive=0;
+                    hexaRobo.getAngle();
+                    if (hexaRobo.isMsgReceive){
+                            HAL_UART_Transmit_IT(&BLUETOOTH_UART,SERVO_RX_BUF,SERVO_RX_BUF[2]+2);
+                    }
+                    hexaRobo.isMsgReceive=0;
+                    break;
+                case setAngle:
+                    if(hexaRobo.isMsgReceive){
+                        moveServosByArray(30,CMD_ARG_BUF[0],hexaRobo.RawAngleData);
+                    }
+                    break;
+                case unlockLeg:
+                    hexaRobo.isMsgReceive=0;
+                    hexaRobo.unlockLegs(CMD_ARG_BUF[0]);
+                    break;
+                default:
+                    hexaRobo.Command = idle;
+                    break;
                 }
             }
     }
