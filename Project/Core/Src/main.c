@@ -103,6 +103,7 @@ int main(void)
 
   /* USER CODE BEGIN 2 */
     char * initInfo = "Stm init......\n\0";
+    char * cmd_test = "CMD_TEST:Connect success!\n\0";
     HAL_UART_Transmit(&BLUETOOTH_UART,initInfo,16,HAL_MAX_DELAY);
     __HAL_UART_CLEAR_IDLEFLAG(&SERVO_UART);
     __HAL_UART_ENABLE_IT(&SERVO_UART, UART_IT_IDLE | UART_IT_RXNE);
@@ -113,38 +114,44 @@ int main(void)
 
     Uart_Init(&SERVO_UART);
     HexaPod_Init(&hexaRobo, debug);
+
   /* USER CODE END 2 */
     /* USER CODE BEGIN WHILE */
     /* Infinite loop */
-    while (1){
-        hexaRobo.Command = idle;
+
+    hexaRobo.Command =getAngle;
         while (1){
             switch (hexaRobo.Command) {
                 case idle:
                     break;
+
+                case cmdTest:
+                    HAL_UART_Transmit_IT(&BLUETOOTH_UART,cmd_test,19);
+
                 case getAngle:
-                    hexaRobo.isMsgReceive=0;
                     hexaRobo.getAngle();
-                    if (hexaRobo.isMsgReceive){
-                            HAL_UART_Transmit_IT(&BLUETOOTH_UART,SERVO_RX_BUF,SERVO_RX_BUF[2]+2);
-                    }
-                    hexaRobo.isMsgReceive=0;
+                    HAL_UART_Transmit(&BLUETOOTH_UART,SERVO_RX_BUF,SERVO_RX_BUF[2]+2,1000);
+                    hexaRobo.Command = idle;
                     break;
+
                 case setAngle:
                     if(hexaRobo.isMsgReceive){
                         moveServosByArray(30,CMD_ARG_BUF[0],hexaRobo.RawAngleData);
                     }
+                    hexaRobo.isMsgReceive = 0;
                     break;
+
                 case unlockLeg:
                     hexaRobo.isMsgReceive=0;
                     hexaRobo.unlockLegs(CMD_ARG_BUF[0]);
                     break;
+
                 default:
                     hexaRobo.Command = idle;
                     break;
                 }
+
             }
-    }
     /* USER CODE END WHILE */
 
     /* USER CODE BEGIN 3 */

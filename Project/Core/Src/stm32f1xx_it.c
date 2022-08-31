@@ -65,7 +65,7 @@ extern UART_HandleTypeDef SERVO_UART;
 char BLUETOOH_RX_BUF[400];
 char SERVO_RX_BUF[400];
 char CMD_ARG_BUF[100];
-HexaPod hexRobo;
+HexaPod hexaRobo;
 /* USER CODE END EV */
 
 /******************************************************************************/
@@ -239,8 +239,6 @@ void USART2_IRQHandler(void)
       bluetoothRevFlag = BLUETOOH_DATA_PROCESSER(BLUETOOH_RX_BUF);
 
       if (bluetoothRevFlag) {
-          char *revMesg = "Command receive\n";
-          HAL_UART_Transmit_IT(&BLUETOOTH_UART, revMesg, 17);
       }
       else {
           char *revMesg = "Unknown command\n";
@@ -278,29 +276,31 @@ int BLUETOOH_DATA_PROCESSER(char* dataBuf){
     if(dataBuf[0] == FRAME_HEADER && dataBuf[1] == FRAME_HEADER){
         dataLen = dataBuf[2];
         switch (dataBuf[3]) {
+            case cmdTest:
+                hexaRobo.Command = cmdTest;
             case getAngle:
-                hexRobo.Command = getAngle;
-                hexRobo.isMsgReceive = 1;
+                hexaRobo.Command = getAngle;
+                hexaRobo.isMsgReceive = 1;
                 break;
             case setAngle:
-                hexRobo.Command = setAngle;
+                hexaRobo.Command = setAngle;
                 char speed = dataBuf[4];
                 CMD_ARG_BUF[0] = speed;
                 for(dataIter = 5;dataIter < dataLen;dataIter+=3){
                     servoID = dataBuf[dataIter];
                     angleLower8B = dataBuf[dataIter+1];
                     angleUpper8B = dataBuf[dataIter+2];
-                    hexRobo.RawAngleData[servoID-1] = ( (angleLower8B) | (angleUpper8B)<<8 );
+                    hexaRobo.RawAngleData[servoID-1] = ( (angleLower8B) | (angleUpper8B)<<8 );
                 }
-                hexRobo.isMsgReceive = 1;
+                hexaRobo.isMsgReceive = 1;
                 break;
             case unlockLeg:
-                hexRobo.Command = unlockLeg;
+                hexaRobo.Command = unlockLeg;
                 CMD_ARG_BUF[0] = dataBuf[4];
-                hexRobo.isMsgReceive = 1;
+                hexaRobo.isMsgReceive = 1;
                 break;
             default:
-                hexRobo.Command = idle;
+                hexaRobo.Command = idle;
                 return -1;
         }
         return 1;
@@ -312,7 +312,7 @@ int BLUETOOH_DATA_PROCESSER(char* dataBuf){
 int SERVO_DATA_PROCESSER(char* dataBuf){
     int dataLen,servoID,dataIter;
     uint16_t angleUpper8B,angleLower8B;
-    hexRobo.mutexRxFromServo = 1;
+    hexaRobo.mutexRxFromServo = 1;
     if(dataBuf[0] == FRAME_HEADER && dataBuf[1] == FRAME_HEADER){
         dataLen = dataBuf[2] + 2;//帧头+数据=总长度
         switch (dataBuf[3]) {
@@ -321,14 +321,14 @@ int SERVO_DATA_PROCESSER(char* dataBuf){
                  servoID = dataBuf[dataIter];
                  angleLower8B = dataBuf[dataIter+1];
                  angleUpper8B = dataBuf[dataIter+2];
-                 hexRobo.RawAngleData[servoID-1] = ( (angleLower8B) | (angleUpper8B)<<8 );
+                 hexaRobo.RawAngleData[servoID-1] = ( (angleLower8B) | (angleUpper8B)<<8 );
                 }
                 break;
             default:break;
         }
     }
-    hexRobo.isMsgReceive = 1;
-    hexRobo.mutexRxFromServo = 0;
+    hexaRobo.isMsgReceive = 1;
+    hexaRobo.mutexRxFromServo = 0;
 }
 
 

@@ -3,7 +3,7 @@
 //
 #include "InverseKinematics.h"
 #include "math.h"
-inline void coordinateToThetaArray(double *thetaForJoint,const double *Tip){
+void coordinateToThetaArray(double *thetaForJoint,const double *Tip){
     double AL,alpha1,alpha2,beta,y_dot;
     double X,Y,Z;
     X = Tip[0];
@@ -18,7 +18,7 @@ inline void coordinateToThetaArray(double *thetaForJoint,const double *Tip){
     thetaForJoint[1] = beta - alpha1;
     thetaForJoint[2] = alpha1 + alpha2;
 }
-inline void thetaToCoordinateArray(double *Tip,const double *thetaForJoint){
+void thetaToCoordinateArray(double *Tip,const double *thetaForJoint){
     double y_dot,thetaA,thetaB,thetaC;
     thetaA = thetaForJoint[0];
     thetaB = thetaForJoint[1];

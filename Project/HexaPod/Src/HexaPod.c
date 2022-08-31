@@ -3,6 +3,7 @@
 //
 #include "HexaPod.h"
 #include <math.h>
+#include "InverseKinematics.h"
 void HexaPod_Init(HexaPod * Robo, runMode mode){
     Robo->mode = mode;
     Robo->move = moveLegsByCoordinate;

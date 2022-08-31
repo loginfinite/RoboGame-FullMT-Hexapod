@@ -149,7 +149,7 @@ void getServoAngle(uint8_t Num,uint16_t Time,...){
         LobotTxBuf[index++] = GET_LOW_BYTE(((uint16_t)temp));
     }
     va_end(arg_ptr);  //置空arg_ptr
-    HAL_UART_Transmit_IT(ServoHuart,LobotTxBuf, LobotTxBuf[2] + 2);    //发送
+    HAL_UART_Transmit(ServoHuart,LobotTxBuf, LobotTxBuf[2] + 2,1000);    //发送
 }
 
 void getServoAngleByArray(uint8_t Num,uint16_t Time, const int* ID){
