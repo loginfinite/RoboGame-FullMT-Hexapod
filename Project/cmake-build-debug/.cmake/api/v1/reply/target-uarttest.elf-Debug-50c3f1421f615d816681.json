@@ -182,19 +182,7 @@
 				},
 				{
 					"backtrace" : 10,
-					"path" : "C:/Users/35802/Desktop/RobogameHex/Project/HexaPod/Inc"
-				},
-				{
-					"backtrace" : 10,
-					"path" : "C:/Users/35802/Desktop/RobogameHex/Project/HexaPod/Src"
-				},
-				{
-					"backtrace" : 10,
-					"path" : "C:/Users/35802/Desktop/RobogameHex/Project/InverseKinematics/Inc"
-				},
-				{
-					"backtrace" : 10,
-					"path" : "C:/Users/35802/Desktop/RobogameHex/Project/InverseKinematics/Src"
+					"path" : "C:/Users/35802/Desktop/RobogameHex/Project/movementsTable"
 				}
 			],
 			"language" : "C",
@@ -228,9 +216,8 @@
 				75,
 				76,
 				77,
-				79,
-				81,
-				84
+				80,
+				81
 			]
 		},
 		{
@@ -331,19 +318,7 @@
 				},
 				{
 					"backtrace" : 10,
-					"path" : "C:/Users/35802/Desktop/RobogameHex/Project/HexaPod/Inc"
-				},
-				{
-					"backtrace" : 10,
-					"path" : "C:/Users/35802/Desktop/RobogameHex/Project/HexaPod/Src"
-				},
-				{
-					"backtrace" : 10,
-					"path" : "C:/Users/35802/Desktop/RobogameHex/Project/InverseKinematics/Inc"
-				},
-				{
-					"backtrace" : 10,
-					"path" : "C:/Users/35802/Desktop/RobogameHex/Project/InverseKinematics/Src"
+					"path" : "C:/Users/35802/Desktop/RobogameHex/Project/movementsTable"
 				}
 			],
 			"language" : "ASM",
@@ -467,9 +442,8 @@
 				61,
 				62,
 				78,
-				80,
-				82,
-				83
+				79,
+				82
 			]
 		},
 		{
@@ -496,9 +470,8 @@
 				75,
 				76,
 				77,
-				79,
-				81,
-				84
+				80,
+				81
 			]
 		},
 		{
@@ -509,7 +482,7 @@
 				13,
 				35,
 				63,
-				85
+				83
 			]
 		}
 	],
@@ -928,28 +901,6 @@
 		},
 		{
 			"backtrace" : 1,
-			"path" : "HexaPod/Inc/HexaPod.h",
-			"sourceGroupIndex" : 0
-		},
-		{
-			"backtrace" : 1,
-			"compileGroupIndex" : 0,
-			"path" : "HexaPod/Src/HexaPod.c",
-			"sourceGroupIndex" : 1
-		},
-		{
-			"backtrace" : 1,
-			"path" : "InverseKinematics/Inc/InverseKinematics.h",
-			"sourceGroupIndex" : 0
-		},
-		{
-			"backtrace" : 1,
-			"compileGroupIndex" : 0,
-			"path" : "InverseKinematics/Src/InverseKinematics.c",
-			"sourceGroupIndex" : 1
-		},
-		{
-			"backtrace" : 1,
 			"path" : "Servo/Inc/Servo.h",
 			"sourceGroupIndex" : 0
 		},
@@ -963,6 +914,17 @@
 			"compileGroupIndex" : 0,
 			"path" : "Servo/Src/Servo.c",
 			"sourceGroupIndex" : 1
+		},
+		{
+			"backtrace" : 1,
+			"compileGroupIndex" : 0,
+			"path" : "movementsTable/movementTable.c",
+			"sourceGroupIndex" : 1
+		},
+		{
+			"backtrace" : 1,
+			"path" : "movementsTable/movementTable.h",
+			"sourceGroupIndex" : 0
 		},
 		{
 			"backtrace" : 1,

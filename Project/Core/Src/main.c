@@ -15,14 +15,14 @@
   *
   ******************************************************************************
   */
-//#include "Servo.h"
-#include "HexaPod.h"
+//
+#include "Servo.h"
 #include <stdio.h>
 #include <stdarg.h>
 /* USER CODE END Header */
 /* Includes ------------------------------------------------------------------*/
 #include "main.h"
-
+#include "movementTable.h"
 /* Private includes ----------------------------------------------------------*/
 /* USER CODE BEGIN Includes */
 /* USER CODE END Includes */
@@ -49,7 +49,7 @@ UART_HandleTypeDef SERVO_UART;
 extern char BLUETOOH_RX_BUF[400];
 extern char SERVO_RX_BUF[400];
 extern char CMD_ARG_BUF[100];
-extern HexaPod hexaRobo;
+extern uint16_t CMD_FLAG;
 /* USER CODE END PV */
 
 /* Private function prototypes -----------------------------------------------*/
@@ -113,45 +113,32 @@ int main(void)
     HAL_UART_Receive_IT(&BLUETOOTH_UART, (uint8_t *)BLUETOOH_RX_BUF, 100);
 
     Uart_Init(&SERVO_UART);
-    HexaPod_Init(&hexaRobo, debug);
+    CMD_FLAG = '0';
 
   /* USER CODE END 2 */
     /* USER CODE BEGIN WHILE */
     /* Infinite loop */
-
-    hexaRobo.Command =getAngle;
         while (1){
-            switch (hexaRobo.Command) {
-                case idle:
+            //movement_highlifting_forward();
+            //movement_turn_left();
+            //movement_rotate_left();
+            switch (CMD_FLAG) {
+                case '1':
+                    movement_highlifting_forward();
                     break;
-
-                case cmdTest:
-                    HAL_UART_Transmit_IT(&BLUETOOTH_UART,cmd_test,19);
-
-                case getAngle:
-                    hexaRobo.getAngle();
-                    HAL_UART_Transmit(&BLUETOOTH_UART,SERVO_RX_BUF,SERVO_RX_BUF[2]+2,1000);
-                    hexaRobo.Command = idle;
+                case '2':
+                    movement_turn_left();
                     break;
-
-                case setAngle:
-                    if(hexaRobo.isMsgReceive){
-                        moveServosByArray(30,CMD_ARG_BUF[0],hexaRobo.RawAngleData);
-                    }
-                    hexaRobo.isMsgReceive = 0;
+                case '3':
+                    movement_rotate_left();
                     break;
-
-                case unlockLeg:
-                    hexaRobo.isMsgReceive=0;
-                    hexaRobo.unlockLegs(CMD_ARG_BUF[0]);
+                case '4':
+                    movement_normal_forward();
                     break;
-
-                default:
-                    hexaRobo.Command = idle;
-                    break;
-                }
-
+                default:break;
             }
+        }
+
     /* USER CODE END WHILE */
 
     /* USER CODE BEGIN 3 */

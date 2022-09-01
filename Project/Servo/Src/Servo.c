@@ -53,6 +53,7 @@ void moveServos(uint8_t Num, uint16_t Time, ...)
     LobotTxBuf[5] = GET_LOW_BYTE(Time);         //取得时间的低八位
     LobotTxBuf[6] = GET_HIGH_BYTE(Time);        //取得时间的高八位
 
+
     for (i = 0; i < Num; i++) {//从可变参数中取得并循环填充舵机ID和对应目标位置
         temp = va_arg(arg_ptr, int);//可参数中取得舵机ID
         LobotTxBuf[index++] = GET_LOW_BYTE(((uint16_t)temp));

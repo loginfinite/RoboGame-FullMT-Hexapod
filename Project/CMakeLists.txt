@@ -50,11 +50,11 @@ else ()
 endif ()
 
 include_directories(Core/Inc Drivers/STM32F1xx_HAL_Driver/Inc Drivers/STM32F1xx_HAL_Driver/Inc/Legacy Drivers/CMSIS/Device/ST/STM32F1xx/Include Drivers/CMSIS/Include
-         Servo/Inc Servo/Src HexaPod/Inc HexaPod/Src InverseKinematics/Inc InverseKinematics/Src)
+         Servo/Inc Servo/Src movementsTable)
 
 add_definitions(-DDEBUG -DUSE_HAL_DRIVER -DSTM32F103xE)
 
-file(GLOB_RECURSE SOURCES "Core/*.*" "Drivers/*.*" "Servo/*.*" "HexaPod/*.*" "InverseKinematics/*.*")
+file(GLOB_RECURSE SOURCES "Core/*.*" "Drivers/*.*" "Servo/*.*" "movementsTable/*.*")
 
 set(LINKER_SCRIPT ${CMAKE_SOURCE_DIR}/STM32F103ZETX_FLASH.ld)
 

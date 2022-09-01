@@ -17,7 +17,6 @@
   */
 #include "stm32f1xx_it.h"
 #include "Servo.h"
-#include "HexaPod.h"
 #include <stdio.h>
 /* USER CODE END Header */
 
@@ -65,7 +64,8 @@ extern UART_HandleTypeDef SERVO_UART;
 char BLUETOOH_RX_BUF[400];
 char SERVO_RX_BUF[400];
 char CMD_ARG_BUF[100];
-HexaPod hexaRobo;
+int16_t ANGLE[30];
+uint16_t CMD_FLAG;
 /* USER CODE END EV */
 
 /******************************************************************************/
@@ -233,18 +233,8 @@ void USART2_IRQHandler(void)
   if (__HAL_UART_GET_FLAG(&BLUETOOTH_UART, UART_FLAG_IDLE) && __HAL_UART_GET_IT_SOURCE(&BLUETOOTH_UART, UART_IT_IDLE)){// 确认产生了串口空闲中断{
       __HAL_UART_CLEAR_IDLEFLAG(&BLUETOOTH_UART); // 清除空闲中断标志
       HAL_UART_AbortReceive_IT(&BLUETOOTH_UART); // 终止中断式接
-      int bluetoothRevFlag =0;
       /***数据处理的部***/
-
-      bluetoothRevFlag = BLUETOOH_DATA_PROCESSER(BLUETOOH_RX_BUF);
-
-      if (bluetoothRevFlag) {
-      }
-      else {
-          char *revMesg = "Unknown command\n";
-          HAL_UART_Transmit_IT(&BLUETOOTH_UART,revMesg,17);
-      }
-
+      CMD_FLAG = BLUETOOH_RX_BUF[0];
       HAL_UART_Receive_IT(&BLUETOOTH_UART,BLUETOOH_RX_BUF, 100); // 开启一次新的中断式接收
 }
   /* USER CODE END USART2_IRQn 1 */
@@ -271,48 +261,13 @@ void USART3_IRQHandler(void)
 
 /* USER CODE BEGIN 1 */
 int BLUETOOH_DATA_PROCESSER(char* dataBuf){
-    int dataLen,servoID,dataIter;
-    uint16_t angleUpper8B,angleLower8B;
-    if(dataBuf[0] == FRAME_HEADER && dataBuf[1] == FRAME_HEADER){
-        dataLen = dataBuf[2];
-        switch (dataBuf[3]) {
-            case cmdTest:
-                hexaRobo.Command = cmdTest;
-            case getAngle:
-                hexaRobo.Command = getAngle;
-                hexaRobo.isMsgReceive = 1;
-                break;
-            case setAngle:
-                hexaRobo.Command = setAngle;
-                char speed = dataBuf[4];
-                CMD_ARG_BUF[0] = speed;
-                for(dataIter = 5;dataIter < dataLen;dataIter+=3){
-                    servoID = dataBuf[dataIter];
-                    angleLower8B = dataBuf[dataIter+1];
-                    angleUpper8B = dataBuf[dataIter+2];
-                    hexaRobo.RawAngleData[servoID-1] = ( (angleLower8B) | (angleUpper8B)<<8 );
-                }
-                hexaRobo.isMsgReceive = 1;
-                break;
-            case unlockLeg:
-                hexaRobo.Command = unlockLeg;
-                CMD_ARG_BUF[0] = dataBuf[4];
-                hexaRobo.isMsgReceive = 1;
-                break;
-            default:
-                hexaRobo.Command = idle;
-                return -1;
-        }
-        return 1;
-    }
-    return -1;
+
 }
 
 
 int SERVO_DATA_PROCESSER(char* dataBuf){
     int dataLen,servoID,dataIter;
     uint16_t angleUpper8B,angleLower8B;
-    hexaRobo.mutexRxFromServo = 1;
     if(dataBuf[0] == FRAME_HEADER && dataBuf[1] == FRAME_HEADER){
         dataLen = dataBuf[2] + 2;//帧头+数据=总长度
         switch (dataBuf[3]) {
@@ -321,14 +276,12 @@ int SERVO_DATA_PROCESSER(char* dataBuf){
                  servoID = dataBuf[dataIter];
                  angleLower8B = dataBuf[dataIter+1];
                  angleUpper8B = dataBuf[dataIter+2];
-                 hexaRobo.RawAngleData[servoID-1] = ( (angleLower8B) | (angleUpper8B)<<8 );
+                 ANGLE[servoID-1] = ( (angleLower8B) | (angleUpper8B)<<8 );
                 }
                 break;
             default:break;
         }
     }
-    hexaRobo.isMsgReceive = 1;
-    hexaRobo.mutexRxFromServo = 0;
 }
 
 
